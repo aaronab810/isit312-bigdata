@@ -4,10 +4,10 @@ We’re building a data lake for a UAE veterinary clinic as part of ISIT312 Big 
 
 ## Start here
 
-Use the [parallel work packages](docs/work_packages.md) to pick up your build. The [data contract](docs/data_contract.md) defines the shared interfaces, and the [baseline evidence](docs/baseline_evidence.md) records the passing course VM run.
+Read the [full project scope](docs/project_scope.md) for the clinic study, data lake implementation, tool comparison, company evaluation and submission. Use the [parallel work packages](docs/work_packages.md) to pick up your build and report contribution. The [data contract](docs/data_contract.md) defines the shared interfaces, and the [baseline evidence](docs/baseline_evidence.md) records the passing course VM run.
 
 1. Open the [team tracker and task guide](https://docs.google.com/document/d/1-GTuj_-7AlCtucJzKBMentBkKPHAQFW1Ps9vZycVRSc). Pick up your assigned component and check its inputs, outputs and handoff.
-2. Download the shared TailSignal ZIP from the [project Page](https://chatgpt.com/space/page_ec6f4a543b088191a8b7fac2d9b51bbc). Extract it locally and read `DATA_GUIDE.md` and `manifest.json`. Use the original ZIP files as inputs. The flat CSV is for browsing.
+2. Download the [TailSignal dataset ZIP from Google Drive](https://drive.google.com/file/d/1Y_SqKYZ3ThxQLYBDuKsIx6bzmYkospM6/view?usp=drivesdk). Extract it locally and read `DATA_GUIDE.md` and `manifest.json`. Use the original ZIP files as inputs. The flat CSV is for browsing.
 3. Build, run and test your assigned component in your own ISIT312 Big Data VM in Oracle VirtualBox. Follow the course labs for HDFS, Scala `spark-shell` with Spark SQL, and Hive through Beeline.
 4. Work on a component branch. Include the commands you ran in the VM, the input used and the actual output in your PR. Keep local paths out of shared code so the next teammate can rerun it.
 
