@@ -19,6 +19,12 @@ Use the [parallel work packages](docs/work_packages.md) to pick up your build. T
 | Clinical Parquet | Structured patients, visits and labs, plus original free-text notes |
 | `derived/visit_crosswalk.csv` | Links practice-export encounters to clinical visits using TailSignal’s generated IDs |
 
+### Types of data
+
+- **Structured**. Fixed columns such as visit IDs, dates and lab values. Examples include Alpha CSV, Gamma pipe-delimited records and the clinical Parquet tables.
+- **Semi-structured**. Beta JSON Lines has one encounter per line, with nested patient fields and arrays of diagnoses and charges.
+- **Unstructured**. The original clinical notes are free-text narratives. Their content is unstructured even though it sits in a Parquet table and links to a visit by ID.
+
 **Pipeline:** Original files → HDFS → Scala Spark SQL → separate Parquet tables for visits, notes and labs → Hive reporting with Beeline. Start with batch processing. Use the same monthly aggregation to compare Spark SQL with the lab’s Java MapReduce `ToolRunner` approach.
 
 ## First demo checkpoint
