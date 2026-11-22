@@ -112,6 +112,9 @@ val betaSchema = StructType(Array(
    StructField("id", StringType, true))), true),
   StructField("patient", StructType(Array(
     StructField("id", StringType, true))), true),
+  StructField("diagnoses", ArrayType(StructType(Array(
+    StructField("code", StringType, true),
+    StructField("text", StringType, true)))), true),
   StructField("charges", ArrayType(StructType(Array(
     StructField("item", StringType, true),
     StructField("amount", StringType, true)))), true),
@@ -341,3 +344,49 @@ spark.sql("""
 println("Demo trace: vet_alpha V533959:")
 spark.sql("SELECT * FROM practice_visits WHERE source_visit_id = 'V533959'").show(false)
 spark.sql("SELECT * FROM practice_charge_lines WHERE source_visit_id = 'V533959' ORDER BY line_number").show(false)
+
+// ===== Step 12:
+
+spark.sql("""
+  SELECT 'vet_alpha' AS source_system, TRIM(visit_id) AS source_visit_id,
+         1 AS diagnosis_number, TRIM(dx_code) AS dx_code, TRIM(dx_desc) AS dx_text
+  FROM alpha_raw
+  WHERE _corrupt_record IS NULL
+  UNION ALL
+  SELECT 'vet_beta', TRIM(encounter_id), pos + 1, TRIM(d.code), TRIM(d.text)
+  FROM beta_raw
+  LATERAL VIEW posexplode(diagnoses) t AS pos, d
+  WHERE _corrupt_record IS NULL
+  UNION ALL
+  SELECT 'vet_gamma', TRIM(VISIT_NO), 1, CAST(NULL AS STRING), TRIM(REASON)
+  FROM gamma_raw
+  WHERE _corrupt_record IS NULL
+""").createOrReplaceTempView("all_diagnoses")
+
+spark.sql("""
+  SELECT d.source_system, d.source_visit_id, CAST(d.diagnosis_number AS INT) AS diagnosis_number,
+         d.dx_code, d.dx_text
+  FROM all_diagnoses d
+  LEFT SEMI JOIN (SELECT source_system, source_visit_id FROM checked_visits
+                  WHERE reason_code IS NULL) a
+    ON d.source_system = a.source_system AND d.source_visit_id = a.source_visit_id
+""").write.mode("overwrite").parquet(s"$normalizedUri/practice_diagnoses")
+
+spark.read.parquet(s"$normalizedUri/practice_diagnoses").createOrReplaceTempView("practice_diagnoses")
+
+println("Diagnoses written")
+spark.sql("""
+  SELECT source_system,
+         COUNT(*)                                      AS diagnoses,
+         COUNT(DISTINCT source_visit_id)               AS visits_with_dx,
+         MAX(diagnosis_number)                         AS max_per_visit,
+         COUNT(CASE WHEN dx_code IS NULL THEN 1 END)   AS no_code
+  FROM practice_diagnoses
+  GROUP BY source_system
+  ORDER BY source_system
+""").show()
+spark.sql("""
+  SELECT * FROM practice_diagnoses
+  WHERE source_visit_id IN ('V533959', 'E500001')
+  ORDER BY source_system, diagnosis_number
+""").show(false)
