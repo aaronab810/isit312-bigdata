@@ -1,0 +1,8 @@
+clinic_id,client_id,patient_id,patient_name,species,breed,sex,dob,visit_id,visit_date,dx_code,dx_desc,line_items,invoice_total,weight_kg
+SITE-08,C132573,1603559,Biscuit,Canine,Labrador Retriever,MN,2009-11-10,V500000,2022-01-01,NUT-OBS,Obesity,Sick visit exam:108.59;Diagnostics/treatment:141.70,250.29,31.25
+SITE-08,C098929,1673214,Kobe,Canine,Golden Ret.,FS,2016-08-01,V500002,2022-01-01,GI-ACU,Acute gastroenteritis,Sick visit exam:98.75;Diagnostics/treatment:382.08,480.83,42.46
+SITE-07,C605812,1796092,Rufus,Feline,DSH,MN,2008-04-06,V500004,2022-01-01,ONC-MAS,"Mass, cutaneous/subcutaneous",Sick visit exam:88.57;Diagnostics/treatment:889.35,977.92,6.4
+SITE-08,C1,too,few,fields
+SITE-08,C2,1000002,Rex,Canine,Lab,MN,2019-03-02,V900001,2024-13-40,WEL,Wellness,Recheck exam:70.00,70.00,30.1
+SITE-08,C3,1000003,Rex,Canine,Lab,MN,2019-03-02,V900002,2024-01-02,WEL,Wellness,Recheck exam:abc,70.00,30.1
+SITE-08,C132573,1603559,Biscuit,Canine,Labrador Retriever,MN,2009-11-10,V500000,2022-01-01,NUT-OBS,Obesity,Sick visit exam:108.59;Diagnostics/treatment:141.70,250.29,31.25
