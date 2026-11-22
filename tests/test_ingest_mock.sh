@@ -27,4 +27,6 @@ test ! -e "$tmp/hdfs/raw/retry/data/b.uploading._COPYING"
 printf 'changed\n' >> "$tmp/input/data/a"
 if run clean; then echo 'FAIL: changed file accepted' >&2; exit 1; fi
 cmp "$tmp/hdfs/raw/clean/data/a" "$tmp/hdfs/raw/retry/data/a"
-echo 'MOCK_TEST_PASS'
+printf 'one
+' > "$tmp/input/data/a"; mkdir -p "$tmp/hdfs/staging/manifest_retry"; printf 'partial' > "$tmp/hdfs/staging/manifest_retry/batch_manifest.tsv.uploading._COPYING"; run manifest_retry | grep BATCH_ACCEPTED; test ! -e "$tmp/hdfs/raw/manifest_retry/batch_manifest.tsv.uploading._COPYING"; cp "$tmp/manifest" "$tmp/manifest_original"; printf '# changed manifest
+' >> "$tmp/manifest"; if run clean; then echo 'FAIL: changed manifest accepted' >&2; exit 1; fi; mv "$tmp/manifest_original" "$tmp/manifest"; echo 'MOCK_TEST_PASS'
