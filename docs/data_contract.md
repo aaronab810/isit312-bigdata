@@ -49,16 +49,16 @@ Use `fixtures/practice_visits.csv` to develop the integration adapter. It matche
 
 For replay fixtures use one accepted-visit key `(clinic, clinic_patient_id, visit_id)` and event metadata `event_id STRING`, `event_version BIGINT`, and `received_at TIMESTAMP`. The highest `event_version` wins. An exact repeat is idempotent. A lower version arriving late has no effect. Conflicting payloads with the same key and version are quarantined and the prior accepted version stays in the snapshot.
 
-## Exceptions, replay, and handoff
+## Rejected records, replay and how the jobs connect
 
 Keep batch-scoped exceptions under `/isit312/vet/exceptions/<batch_id>/<component>` with `batch_id`, `source_path`, `reason_code`, and available keys. Report malformed inputs or missing keys, duplicate keys, invalid links, unexpected orphan notes or labs, and expected unmatched encounters separately. Keep originals available in raw HDFS. Reconcile source rows to accepted, unmatched, or rejected outcomes at the source's own grain. The full archive has 53,167 PIMS encounters and 53,123 crosswalk matches, leaving 44 PIMS-only and 8,404 EHR-only visits. Expected unmatched encounters are a separate category from invalid links.
 
-Finish the full batch before incremental replay. Treat `batch_id` as the identity of the archived inputs for a run. Replaying an identical batch must reproduce its accepted and exception outputs without appending duplicate rows. If the supplied file content changes, use a new batch ID. Register or expose only a completed batch for downstream reads. Use one explicit batch per report or benchmark.
+Build and test replay on the baseline visits. In the final pipeline, replay reads a completed batch. Treat `batch_id` as the identity of the archived inputs for a run. Replaying an identical batch must reproduce its accepted and exception outputs without appending duplicate rows. If the supplied file content changes, use a new batch ID. Make only complete batches available to other jobs. Use one explicit batch per report or benchmark.
 
-- Ingestion hands the batch ID, raw paths, manifest, and file and row counts to integration.
-- Integration hands accepted Parquet locations, table schemas, reconciliation counts, and exceptions to the Hive and QA teammates. Use the three table names above for Hive tables and Spark check views. Pass the Hive database and HDFS paths as configuration.
+- In the final run, integration reads the batch ID, raw paths, manifest, and file and row counts from ingestion.
+- In the final run, Hive reporting and the Spark checks use the accepted Parquet locations, table schemas, counts and rejected rows from integration. Use the three table names above for Hive tables and Spark check views. Pass the Hive database and HDFS paths as configuration.
 - Beeline reports count rows from `visits` grouped by `clinic`, month of `visit_date`, and `visit_type`. For visit-level output with note or lab metrics, aggregate child rows before joining them. Compare Scala Spark SQL and Java MapReduce `ToolRunner` on the same accepted visits and grouping.
 
-## Demo checkpoint
+## Reference result for the final live run
 
 Trace `vet_alpha` encounter `V533959` through the crosswalk to clinical visit `EV0033960` at `SITE-08`. Its clinical `day` is 925, or `2024-07-14`. Expect one procedure visit, one original note, and seven lab rows. That visit contributes one of 20 `SITE-08` procedure visits in July 2024. The complete archive contains 61,527 clinical visits, 61,527 notes, and 99,687 lab results. Confirm the accepted totals and checkpoint in the course VM.

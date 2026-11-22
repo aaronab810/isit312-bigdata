@@ -9,11 +9,11 @@ The ISIT312 project studies the existing data workflow of a real UAE veterinary 
 - **Evaluation and trade-offs.** Measure data quality and report reconciliation. Compare Spark SQL and MapReduce using the same data and workload at two sizes, then explain which approach fits the clinic’s requirements and where each falls short. Use replay tests for late and corrected files.
 - **Company evaluation and submission.** Record the clinic’s assessment, resulting design changes and lessons learned. Submit the report, codebase, architecture diagram, screenshots and sample job evidence, and a presentation that follows the report.
 
-## Role of the live demo
+## What the final live run shows
 
 The live demo shows monthly visit counts and one visit traced back to its original note and lab results. It provides evidence for the architecture, the integration rules and the reporting logic.
 
-The passing HDFS and Spark baseline gives everyone local inputs. The completed team project also needs the merged run through Hive/Beeline, the empirical comparison and the clinic’s assessment.
+Everyone can work on their own VM using the shared ZIP, supplied test files or cleaned tables from the baseline script. The team connects the finished jobs for one final live run through Hive and Beeline and includes the measured tool comparison and clinic feedback in the submission.
 
 ## Report and presentation
 
