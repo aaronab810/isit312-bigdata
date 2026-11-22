@@ -6,10 +6,10 @@ We’re building a data lake for a UAE veterinary clinic as part of ISIT312 Big 
 
 Read the [full project scope](docs/project_scope.md) for the clinic study, data lake implementation, tool comparison, company evaluation and submission. Use the [parallel work packages](docs/work_packages.md) to pick up your build and report contribution. The [data contract](docs/data_contract.md) defines the shared interfaces, and the [baseline evidence](docs/baseline_evidence.md) records the passing course VM run.
 
-1. Open the [team tracker and task guide](https://docs.google.com/document/d/1-GTuj_-7AlCtucJzKBMentBkKPHAQFW1Ps9vZycVRSc). Pick up your assigned component and check its inputs, outputs and handoff.
+1. Find your name in the [GitHub work instructions](docs/work_packages.md) or the [Google Doc](https://docs.google.com/document/d/1-GTuj_-7AlCtucJzKBMentBkKPHAQFW1Ps9vZycVRSc). Your assignment tells you what to start with, what to build on your VM and what to submit.
 2. Download the [TailSignal dataset ZIP from Google Drive](https://drive.google.com/file/d/1Y_SqKYZ3ThxQLYBDuKsIx6bzmYkospM6/view?usp=drivesdk). Extract it locally and read `DATA_GUIDE.md` and `manifest.json`. Use the original ZIP files as inputs. The flat CSV is for browsing.
 3. Build, run and test your assigned component in your own ISIT312 Big Data VM in Oracle VirtualBox. Follow the course labs for HDFS, Scala `spark-shell` with Spark SQL, and Hive through Beeline.
-4. Work on a component branch. Include the commands you ran in the VM, the input used and the actual output in your PR. Keep local paths out of shared code so the next teammate can rerun it.
+4. Start your branch from `project-start` and open your pull request against it. Include the VM commands, inputs, actual output or log, and a screenshot. Everyone can build, test and submit using the shared ZIP, test files or local baseline. Connect the finished jobs for one final live run.
 
 ## Dataset and pipeline
 
@@ -27,7 +27,7 @@ Read the [full project scope](docs/project_scope.md) for the clinic study, data 
 
 **Pipeline:** Original files → HDFS → Scala Spark SQL → separate Parquet tables for visits, notes and labs → Hive reporting with Beeline. Start with batch processing. Use the same monthly aggregation to compare Spark SQL with the lab’s Java MapReduce `ToolRunner` approach.
 
-## First demo checkpoint
+## Expected result for the final live run
 
 Trace Alpha `V533959` to clinical visit `EV0033960` at `SITE-08` on 14 July 2024. Show one visit, one original note and seven lab rows. The visit counts once in the monthly procedure report, which has 20 visits for that site and month.
 
