@@ -107,7 +107,7 @@ hadoop fs -mkdir -p "$STAGE"
 if hadoop fs -test -f "$STAGE/batch_manifest.tsv"; then
   [[ "$(hdfs_sha "$STAGE/batch_manifest.tsv")" == "$(local_sha "$MANIFEST")" ]] || { echo "STAGING_MANIFEST_MISMATCH $BATCH_ID" >&2; exit 1; }
 else
-  hadoop fs -copyFromLocal "$MANIFEST" "$STAGE/batch_manifest.tsv"
+  manifest_temp="$STAGE/batch_manifest.tsv.uploading"; if hadoop fs -test -e "$manifest_temp"; then hadoop fs -rm "$manifest_temp"; fi; if hadoop fs -test -e "$manifest_temp._COPYING"; then hadoop fs -rm "$manifest_temp._COPYING"; fi; hadoop fs -copyFromLocal "$MANIFEST" "$manifest_temp"; [[ "$(hdfs_sha "$manifest_temp")" == "$(local_sha "$MANIFEST")" ]] || { echo "UPLOAD_MANIFEST_MISMATCH" >&2; exit 1; }; hadoop fs -mv "$manifest_temp" "$STAGE/batch_manifest.tsv"
 fi
 while IFS=$'\t' read -r rel bytes expected; do
   [[ -z "$rel" || "$rel" == \#* ]] && continue
