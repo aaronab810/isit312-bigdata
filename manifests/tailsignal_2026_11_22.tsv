@@ -1,0 +1,21 @@
+# TailSignal source manifest for HDFS ingestion
+# format: relative_path<TAB>bytes<TAB>sha256
+# Source row counts from the supplied manifest.json, not independently measured:
+# Alpha 18881; Beta 17571; Gamma 16715; locations 9
+# EHR patients 12990; visits 61527; notes 61527; procedures 4995
+# EHR prescriptions 47635; labs 99687; crosswalk 53123
+# derived visits_with_notes 61527; guide and license have no row counts
+data/pims/vet_alpha_visits.csv	3710038	642e316dd9e77941ca333c5ebca918891ef695bf83e9ff2b56db5da7a9163116
+data/pims/vet_beta_encounters.jsonl	8483031	cc3132087e5dd9eda8e2c56def5ae16f3af7719022a1635f3d45fc2f6347a36c
+data/pims/vet_gamma_visits.txt	1485299	caafafeedef0305c6165e7f51f4a4c2edb52116c88a05d49330699113b7bbaaa
+data/pims/locations.csv	256	0d9ebbbac724601ee1f9b601b137c728371017470d69c0c039e57a6384d2d660
+data/ehr/ehr_patients.parquet	239300	d2c60d8be31458a657e24928dfe773030c9edf57fcb43b9453570865dfa62bb6
+data/ehr/ehr_visits.parquet	818808	fac9c30f288f5b34db9d1e4d814c7c262a29d3b90405752770794e77f65a07f4
+data/ehr/ehr_notes.parquet	2071290	aee9a06d79b721a61c18a2ea28d91bc950c53690a2af018560ae27223d865f01
+data/ehr/ehr_procedures.parquet	141805	313f45b83ee861fc464a1ed9bc177bc966447e1edfc46b4d4a4ef553970574e3
+data/ehr/ehr_prescriptions.parquet	882360	8b973250b224f799e2acbcc9db21ccc7298984cff0f908ef893976b82cc996f8
+data/ehr/ehr_labs.parquet	589814	48a8318060c32478ed5c304089970ba38eed462f3d40fd32e7ef833c9cc638ae
+derived/visit_crosswalk.csv	3950042	116ccd279339feafdc7030be1f66d3322f20aef7e50c2dfb62cbd155ea9081b6
+derived/visits_with_notes.parquet	2308009	3d1224ca135d0f8290faefb122d3e553a8d9c1c1f193b6889a2b9af58313dccd
+TAILSIGNAL-LICENSE.txt	1070	84251a1991c5cf7b903249d5485bbb8eabec1ba39ffbaac6d8d85f1a10f6d018
+DATA_GUIDE.md	2070	9d31060b9433718054062a14e594ebf77f52fa8a77d6d42aed330a171b652589
