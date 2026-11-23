@@ -1,6 +1,10 @@
 #!/usr/bin/env bash
 set -euo pipefail
-[[ $1 == fs ]]; shift
+if [[ $# -eq 3 && $1 == getconf && $2 == -confKey && $3 == fs.defaultFS ]]; then
+  printf '%s\n' "${MOCK_DEFAULT_FS:-hdfs://localhost:8020}"
+  exit 0
+fi
+[[ $1 == dfs ]]; shift
 cmd=$1; shift
 case "$cmd" in
   -mkdir) [[ ${1:-} != -p ]] || shift; mkdir -p "$@" ;;

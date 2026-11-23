@@ -1,7 +1,7 @@
 # ISIT312 Demo Launcher Runbook
 
 ## Overview
-This runbook explains how to run the baseline smoke check and the demo launcher (`demo/run_demo.sh`) on the course Big Data VM, how failures and logs are handled, and how upcoming teammate PRs plug into the launcher.
+The launcher runs the shared baseline on the course Big Data VM and saves its output. The remaining jobs will be wired into the final launcher as their entry points become available.
 
 ## Prerequisites
 1. Course Big Data VM running in VirtualBox with HDFS available (`hdfs dfs -ls /` succeeds).
@@ -10,6 +10,12 @@ This runbook explains how to run the baseline smoke check and the demo launcher 
 
 ## Commands
 
-### 1. Run Baseline Smoke Check Directly
+Run from the repository root:
+
 ```bash
-./smoke/run_first_visit.sh "/path/to/ISIT312 TailSignal veterinary dataset.zip"
+bash demo/run_demo.sh "/path/to/tailsignal_vet_dataset.zip"
+```
+
+The launcher prints `ISIT312_BASELINE_PASS` only after the baseline passes. The log is saved under `logs/demo-*.log`, or under `ISIT312_LOG_DIR` if set. A failed baseline returns a nonzero status. The launcher rejects requests to enable stages that have yet to be connected.
+
+To run the same baseline directly, use `bash smoke/run_first_visit.sh /path/to/tailsignal_vet_dataset.zip`.

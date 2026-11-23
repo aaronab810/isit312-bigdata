@@ -28,10 +28,11 @@ exec 3>"$work/logs/commands.log"
 export BASH_XTRACEFD=3
 set -x
 printf 'RUN_ID=%s\nBENCH_ROOT=%s\n' "$run_id" "$BENCH_ROOT"
+passed() { tr '\r' '\n' < "$2" | grep -Fx "$1" > /dev/null; }
 if [[ -z ${ACCEPTED_VISITS:-} ]]; then
   echo 'STEP 1 Run the supplied baseline'
   bash "$project/smoke/run_first_visit.sh" "$archive" | tee "$work/logs/baseline-console.log"
-  grep -q '^ISIT312_SMOKE_PASS$' "$work/logs/baseline-console.log"
+  passed ISIT312_SMOKE_PASS "$work/logs/baseline-console.log"
   accepted=$(sed -n 's/^Accepted: //p' "$work/logs/baseline-console.log" | tail -n 1)
   [[ -n "$accepted" ]]
   export ACCEPTED_VISITS="$accepted/visits"
@@ -58,7 +59,7 @@ export BATCH_ID=$(basename "$(dirname "$ACCEPTED_VISITS")")
 echo 'STEP 2 Prepare both HDFS inputs and compile Java outside timing'
 printf ':paste %s\n' "$here/prepare_input.sc" | "$spark" --master "$SPARK_MASTER" \
   > "$work/logs/prepare.log" 2>&1
-grep -q '^ASHRAFUR_PREPARE_PASS$' "$work/logs/prepare.log"
+passed ASHRAFUR_PREPARE_PASS "$work/logs/prepare.log"
 javac -cp "$("$hadoop" classpath)" -d "$work/build/classes" "$here/MonthlyVisits.java"
 jar cf "$work/build/monthly.jar" -C "$work/build/classes" .
 for size in original larger; do
@@ -74,7 +75,7 @@ spark_run() {
   printf ':paste %s\n' "$here/monthly.sc" | \
     /usr/bin/time -f '%e' -o "$work/logs/$name.time" \
     "$spark" --master "$SPARK_MASTER" > "$work/logs/$name.log" 2>&1
-  grep -q 'ASHRAFUR_SPARK_PASS' "$work/logs/$name.log"
+  passed ASHRAFUR_SPARK_PASS "$work/logs/$name.log"
   "$hadoop" fs -test -e "$BENCH_OUTPUT/_SUCCESS"
 }
 mr_run() {

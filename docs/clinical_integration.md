@@ -26,7 +26,7 @@ SMOKE=smoke-YYYYMMDDTHHMMSS-NNNN          # from the Raw: line
 bash spark/run_integrate_clinical.sh fixture "$SMOKE"
 
 # 3. Full batch. Copy the raw files to their own batch ID so the smoke baseline tables stay untouched,
-#    then run Alina's parser and the integration job in one Spark session.
+#    then run Alina's parser and the integration job in order.
 hdfs dfs -cp "/isit312/vet/raw/$SMOKE" /isit312/vet/raw/hani-full-01
 RUN_PARSER=1 bash spark/run_integrate_clinical.sh full hani-full-01
 
@@ -45,7 +45,7 @@ $HIVE_HOME/bin/beeline -u jdbc:hive2://localhost:10000 --hivevar db=isit312_vet 
 $HIVE_HOME/bin/beeline -u jdbc:hive2://localhost:10000 --hivevar db=isit312_vet -f sql/hive/integration_checks.sql
 ```
 
-Each wrapper run saves its log under `logs/` and ends with `PASS (<mode>)`. It stops with `FAILED` if a script does not print its final marker (`ISIT312_INTEGRATION_PASS`, and in fault mode also `ISIT312_FAULT_BATCH_READY` and `ISIT312_FAULTS_PASS`). To run the job by hand, set `BATCH_ID` and any `ISIT312_*` overrides listed at the top of the script, then use `:paste spark/integrate_clinical.sc` in `spark-shell`.
+Each wrapper run saves its log under `logs/` and ends with `PASS (<mode>)`. A failed Spark command or missing final marker stops the run. With `RUN_PARSER=1`, use the default paths for the batch. The parser runs in its own session and must print `ISIT312_PRACTICE_PASS` before integration starts. Register the batch in Hive after `PASS (full)` appears. Use a fresh batch ID for a final run so an incomplete retry cannot replace a batch already used by Hive.
 
 ## How the records connect
 
@@ -174,7 +174,7 @@ A record with no match: Alpha `V517829` (SITE-08, 2023-05-07) has no crosswalk r
 
 ## Fixture run
 
-With `fixtures/practice_visits.csv`, `V533959` links to `EV0033960`, and `V517829` lands in the exceptions table as `PRACTICE_ONLY`. All 61,527 visits, notes and lab rows are still accepted. 8,404 visits are clinical-only, and 53,122 are `source_not_loaded` because their practice encounters are not in the two-row fixture.
+With `fixtures/practice_visits.csv`, `V533959` links to `EV0033960`, and `V517829` lands in the exceptions table as `PRACTICE_ONLY`. The output keeps 61,527 visits, 61,527 notes and 99,687 lab rows. Of those visits, 8,404 are clinical-only and 53,122 are `source_not_loaded` because their practice encounters are outside the fixture.
 
 ## Fault test
 
@@ -211,7 +211,7 @@ All 22 rows matched in the local run, and EV0033960 stayed one matched visit wit
 
 - **Sarib.** Point the Hive tables at `accepted/<batch>`. The columns are a superset of the baseline, and `link_status` separates matched visits from clinical-only ones. `integration_exceptions` is new, and `sql/hive/integration_checks.sql` shows a drill-down that counts child rows before the join.
 - **Aaron.** Run `tests/run_integration_checks.sc` with `ISIT312_BASELINE=/isit312/vet/accepted/<batch>`. The data contract could list the exceptions columns above.
-- **Hashim.** For the launcher stage, after ingestion and Alina's parser: `bash spark/run_integrate_clinical.sh full "$BATCH_ID"`. Use `RUN_PARSER=1` to run the parser in the same Spark session.
+- **Hashim.** After ingestion, run `RUN_PARSER=1 bash spark/run_integrate_clinical.sh full "$BATCH_ID"`. If the parser already passed for this batch, omit `RUN_PARSER=1`. Start Hive after the full mode passes.
 - **Anuj and Ashrafur.** `visits` keeps one row per `(clinic, clinic_patient_id, visit_id)` with `visit_date` and `visit_type`, as in the baseline.
 
 ## Limitations
