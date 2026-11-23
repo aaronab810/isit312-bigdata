@@ -1,0 +1,11 @@
+batch,event_id,outcome,reason_code
+01_new_visit,E01-001,inserted,inserted
+01_new_visit,E01-001,duplicate_in_batch,duplicate_in_batch
+02_correction,E02-001,updated,updated
+03_repeat,E02-001,repeat_no_change,repeat_no_change
+04_late_older,E04-001,stale_late_arrival,stale_late_arrival
+05_conflict,E05-001,conflict_same_version,conflict_same_version
+05_conflict,E05-002,conflict_same_version,conflict_same_version
+05_conflict,E05-003,updated,updated
+05_conflict,E05-004,rejected,missing_key
+05_conflict,E05-005,visit_id_on_other_patient,visit_id_on_other_patient
