@@ -1,0 +1,6 @@
+batch,clinic,visit_year,visit_month,visit_type,count_change
+01_new_visit,SITE-03,2025,3,recheck,1
+02_correction,SITE-03,2025,3,sick,1
+02_correction,SITE-03,2025,3,wellness,-1
+05_conflict,SITE-03,2025,3,recheck,1
+05_conflict,SITE-03,2025,3,sick,-1

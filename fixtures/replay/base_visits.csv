@@ -1,0 +1,6 @@
+clinic,clinic_patient_id,visit_id,visit_type,visit_date,source_system,source_visit_id
+SITE-08,SITE-08-00886,EV0033960,procedure,2024-07-14,vet_alpha,V533959
+SITE-03,SITE-03-00074,EV0041764,recheck,2025-03-01,vet_gamma,541763
+SITE-03,SITE-03-00128,EV0041766,sick,2025-03-01,vet_gamma,541765
+SITE-03,SITE-03-00843,EV0041789,wellness,2025-03-01,vet_gamma,541788
+SITE-03,SITE-03-00565,EV0058369,sick,2025-03-01,,
