@@ -42,7 +42,7 @@ val notesIn =
   if (inputUri.toLowerCase.endsWith(".csv"))
     spark.read.schema(noteSchema).option("header", "true").option("multiLine", "true")
       .option("escape", "\"").csv(inputUri)
-  else spark.read.parquet(inputUri).select("clinic", "clinic_patient_id", "visit_id", "day", "text")
+  else spark.read.parquet(inputUri).select("clinic", "clinic_patient_id", "visit_id", "text")
 notesIn.createOrReplaceTempView("notes_in")
 
 // Keys are strings. A note needs all three key parts and non-blank text. Duplicate keys are set aside.

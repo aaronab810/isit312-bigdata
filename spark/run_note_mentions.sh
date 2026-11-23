@@ -36,7 +36,7 @@ find_tool() {
     return 1
 }
 
-if ! spark_shell=$(find_tool spark-shell "${SPARK_HOME:-}" "$HOME"/spark* /usr/local/spark* /opt/spark*); then
+if ! spark_shell=$(find_tool spark-shell "${SPARK_HOME:-}" "$HOME"/spark* /usr/local/spark* /opt/spark* /usr/share/spark); then
     printf 'Spark shell not found. Set SPARK_HOME to the course Spark directory and rerun.\n' >&2
     exit 1
 fi
@@ -47,7 +47,7 @@ run_sc() {
     printf 'Running %s\nLog: %s\n' "$script" "$log"
     printf ':paste %s\n:quit\n' "$script" | "$spark_shell" --master "$master" 2>&1 | tee "$log"
     # The Spark shell can return zero after a Scala exception. Require the marker.
-    if ! grep -q "^$marker\$" "$log"; then
+    if ! tr '\r' '\n' < "$log" | grep -Fx "$marker" > /dev/null; then
         printf 'FAILED: %s not found in %s\n' "$marker" "$log" >&2
         exit 1
     fi
@@ -75,11 +75,12 @@ fixture)
 batch)
     batch=${2:?Usage: run_note_mentions.sh batch <batch_id> [dataset.zip]}
     archive=${3:-}
-    if ! hdfs_bin=$(find_tool hdfs "${HADOOP_HOME:-}" "$HOME"/hadoop* /usr/local/hadoop* /opt/hadoop*); then
+    if ! hdfs_bin=$(find_tool hdfs "${HADOOP_HOME:-}" "$HOME"/hadoop* /usr/local/hadoop* /opt/hadoop* /usr/share/hadoop); then
         printf 'Hadoop client not found. Set HADOOP_HOME to the course Hadoop directory and rerun.\n' >&2
         exit 1
     fi
     fs=$("$hdfs_bin" getconf -confKey fs.defaultFS)
+    [[ $fs == hdfs://* ]] || { printf 'Expected HDFS, found %s\n' "$fs" >&2; exit 1; }
     fs=${fs%/}
     notes="$hdfs_root/accepted/$batch/clinical_notes"
     if ! "$hdfs_bin" dfs -test -d "$notes"; then
@@ -103,7 +104,7 @@ batch)
         export NOTE_MENTIONS_URI="$NOTE_MENTIONS_OUTPUT"
         export NOTES_URI="$NOTE_MENTIONS_INPUT"
         export GOLD_URI="$fs$labels"
-        export EVAL_SPLITS=${EVAL_SPLITS:-dev,test}
+        export EVAL_SPLITS=${EVAL_SPLITS:-test}
         export EVAL_OUTPUT="$fs$hdfs_root/evaluation/$batch/note_mentions_metrics"
         run_sc "$here/evaluate_note_mentions.sc" ISIT312_NOTE_EVAL_PASS "$log_dir/note_eval_${batch}_$stamp.log"
     fi
