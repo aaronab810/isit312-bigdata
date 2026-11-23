@@ -65,4 +65,4 @@ log="$here/first_visit_${batch}.log"
 printf 'Raw: %s\nAccepted: %s\nLog: %s\n' "$ISIT312_RAW_URI" "$ISIT312_ACCEPTED_URI" "$log"
 printf ':paste %s\n:quit\n' "$here/first_visit.sc" | "$spark_shell" --master local[2] 2>&1 | tee "$log"
 # The Spark shell can return zero after a Scala exception. Require the final marker.
-grep -q '^ISIT312_SMOKE_PASS$' "$log"
+tr '\r' '\n' < "$log" | grep -x 'ISIT312_SMOKE_PASS' > /dev/null

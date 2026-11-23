@@ -6,7 +6,7 @@
 #   bash spark/run_integrate_clinical.sh faults  <batch_id>  inject faults into a small copy and check each one is caught
 #
 # The raw batch must already be on HDFS under $ISIT312_HDFS_ROOT/raw/<batch_id>. smoke/run_first_visit.sh
-# prints it as "Raw:". In full mode, RUN_PARSER=1 runs spark/normalize_practice.sc first in the same session.
+# prints it as "Raw:". In full mode, RUN_PARSER=1 runs and checks the parser before starting integration.
 # Optional: ISIT312_HDFS_ROOT (default /isit312/vet), ISIT312_LOG_DIR (default logs/), SPARK_MASTER (default local[2]),
 # SPARK_SHUFFLE_PARTITIONS (default 16; Spark's 200 is slow for 61,527 visits on a two-core VM).
 set -euo pipefail
@@ -54,9 +54,6 @@ markers=()
 case $mode in
     full)
         export BATCH_ID=$batch ISIT312_HDFS_ROOT=$hdfs_root ISIT312_PRACTICE_SCOPE=full
-        if [[ ${RUN_PARSER:-0} == 1 ]]; then
-            scripts+=("$repo/spark/normalize_practice.sc")
-        fi
         scripts+=("$repo/spark/integrate_clinical.sc")
         markers+=(ISIT312_INTEGRATION_PASS)
         ;;
@@ -84,19 +81,34 @@ log="$log_dir/integrate_clinical_${mode}_${batch}_$(date -u +%Y%m%dT%H%M%SZ).log
 printf 'Spark shell: %s\nMode: %s\nBatch: %s\nLog: %s\n' "$spark_shell" "$mode" "$BATCH_ID" "$log"
 printf 'Commit: %s\n' "$(git -C "$repo" rev-parse --short HEAD 2>/dev/null || echo unknown)" | tee "$log"
 
-{
-    for script in "${scripts[@]}"; do
-        printf ':paste %s\n' "$script"
-    done
-    printf ':quit\n'
-} | "$spark_shell" --master "${SPARK_MASTER:-local[2]}" \
-    --conf "spark.sql.shuffle.partitions=${SPARK_SHUFFLE_PARTITIONS:-16}" 2>&1 | tee -a "$log" || true
+run_spark() {
+    {
+        printf ':paste %s\n' "$@"
+        printf ':quit\n'
+    } | "$spark_shell" --master "${SPARK_MASTER:-local[2]}" \
+        --conf "spark.sql.shuffle.partitions=${SPARK_SHUFFLE_PARTITIONS:-16}" 2>&1 | tee -a "$log"
+}
 
-# spark-shell can exit with status 0 after a Scala exception, so require each script's final marker.
-for marker in "${markers[@]}"; do
-    if ! grep -q "^$marker\$" "$log"; then
+# spark-shell can exit with status 0 after a Scala exception, so require the final marker too.
+require_marker() {
+    local marker=$1
+    if ! tr '\r' '\n' < "$log" | grep -Fx "$marker" > /dev/null; then
         printf '\nFAILED: %s was not printed. Check the log: %s\n' "$marker" "$log" >&2
         exit 1
     fi
+}
+
+if [[ "$mode" == full && ${RUN_PARSER:-0} == 1 ]]; then
+    if [[ ${ISIT312_RAW_URI:-"$hdfs_root/raw/$batch"} != "$hdfs_root/raw/$batch" ||
+          ${ISIT312_PRACTICE_URI:-"$hdfs_root/normalized/$batch/practice_visits"} != "$hdfs_root/normalized/$batch/practice_visits" ]]; then
+        printf 'FAILED: RUN_PARSER=1 requires the default input paths for this batch.\n' >&2
+        exit 1
+    fi
+    run_spark "$repo/spark/normalize_practice.sc"
+    require_marker ISIT312_PRACTICE_PASS
+fi
+run_spark "${scripts[@]}"
+for marker in "${markers[@]}"; do
+    require_marker "$marker"
 done
 printf '\nPASS (%s): %s\n' "$mode" "$log"

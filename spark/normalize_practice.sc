@@ -390,3 +390,4 @@ spark.sql("""
   WHERE source_visit_id IN ('V533959', 'E500001')
   ORDER BY source_system, diagnosis_number
 """).show(false)
+println("ISIT312_PRACTICE_PASS")

@@ -4,9 +4,10 @@ repo=$(cd "$(dirname "$0")/.." && pwd)
 tmp=$(mktemp -d)
 trap 'rm -rf "$tmp"' EXIT
 mkdir -p "$tmp/bin" "$tmp/input/data" "$tmp/hdfs"
-cp "$repo/tests/mock_hadoop.sh" "$tmp/bin/hadoop"
-chmod +x "$tmp/bin/hadoop"
+cp "$repo/tests/mock_hadoop.sh" "$tmp/bin/hdfs"
+chmod +x "$tmp/bin/hdfs"
 export PATH="$tmp/bin:$PATH"
+unset HADOOP_HOME
 printf 'one\n' > "$tmp/input/data/a"
 printf 'two\n' > "$tmp/input/data/b"
 for f in data/a data/b; do
@@ -15,6 +16,11 @@ done > "$tmp/manifest"
 loader="$repo/ingest/land_batch.sh"
 [[ -f "$loader" ]] || loader="$repo/scripts/ingest_hdfs.sh"
 run() { bash "$loader" --source "$tmp/input" --hdfs-root "$tmp/hdfs" --batch-id "$1" --manifest "$tmp/manifest"; }
+if MOCK_DEFAULT_FS=file:/// run wrong_filesystem; then
+  echo 'FAIL: local filesystem accepted' >&2
+  exit 1
+fi
+test ! -e "$tmp/hdfs/raw/wrong_filesystem"
 run clean
 run clean | grep REPLAY_ALREADY_ACCEPTED
 mkdir -p "$tmp/hdfs/staging/retry/data"
