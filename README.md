@@ -1,40 +1,31 @@
-# ISIT312 Veterinary Data Lake
+# Veterinary Clinic Data Lake
 
-We’re building a data lake for a UAE veterinary clinic as part of ISIT312 Big Data Management at the University of Wollongong in Dubai. The demo brings practice-management exports, structured clinical visits, original free-text notes and lab results together. It reports visits by site, month and visit type, then traces one visit back to its source record, note and lab results.
+An ISIT312 Big Data Management project at the University of Wollongong in Dubai. We built a data lake for a case study with Doctor Dolittle Veterinary Clinic, a UAE clinic with one branch and plans to expand.
 
-## Start here
+## The problem
 
-Use the [project-start branch](https://github.com/aaronab810/isit312-bigdata/tree/project-start) for the course VM scripts, test files and team work instructions.
+The clinic’s practice system records visits, clinical notes and billing. Laboratory results arrive separately. When a lab export cannot be matched to a visit, staff may need to reconcile it manually. The project brings those sources together so a reader can check which records contributed to a report and see which links need review.
 
-Read the [full project scope](https://github.com/aaronab810/isit312-bigdata/blob/project-start/docs/project_scope.md) for the clinic study, data lake implementation, tool comparison, company evaluation and submission. Use the [parallel work packages](https://github.com/aaronab810/isit312-bigdata/blob/project-start/docs/work_packages.md) to pick up your build and report contribution. The [data contract](https://github.com/aaronab810/isit312-bigdata/blob/project-start/docs/data_contract.md) defines the shared interfaces, and the [baseline evidence](https://github.com/aaronab810/isit312-bigdata/blob/project-start/docs/baseline_evidence.md) records the passing course VM run.
+## How it works
 
-1. Find your name in the [GitHub work instructions](https://github.com/aaronab810/isit312-bigdata/blob/project-start/docs/work_packages.md) or the [Google Doc](https://docs.google.com/document/d/1-GTuj_-7AlCtucJzKBMentBkKPHAQFW1Ps9vZycVRSc). Your assignment tells you what to start with, what to build on your VM and what to submit.
-2. Download the [TailSignal dataset ZIP from Google Drive](https://drive.google.com/file/d/1Y_SqKYZ3ThxQLYBDuKsIx6bzmYkospM6/view?usp=drivesdk). Extract it locally and read `DATA_GUIDE.md` and `manifest.json`. Use the original ZIP files as inputs. The flat CSV is for browsing.
-3. Build, run and test your assigned component in your own ISIT312 Big Data VM in Oracle VirtualBox. Follow the course labs for HDFS, Scala `spark-shell` with Spark SQL, and Hive through Beeline.
-4. Start your branch from `project-start` and open your pull request against it. Include the VM commands, inputs, actual output or log, and a screenshot. Everyone can build, test and submit using the shared ZIP, test files or local baseline. Connect the finished jobs for one final live run.
-
-## Dataset and pipeline
-
-| Input | Role |
+| Stage | What it does |
 | --- | --- |
-| Alpha CSV, Beta JSON Lines, Gamma pipe-delimited text | Three synthetic practice exports with distinct schemas and source IDs |
-| Clinical Parquet | Structured patients, visits and labs, plus original free-text notes |
-| `derived/visit_crosswalk.csv` | Links practice-export encounters to clinical visits using TailSignal’s generated IDs |
+| **HDFS** | Keeps the original exports and verifies each file against the batch manifest. |
+| **Scala Spark SQL** | Reads three practice export layouts, standardises their fields, and links encounters to clinical visits, notes and lab measurements. It records unmatched entries for review. |
+| **Hive** | Uses the prepared Parquet tables to count visits by site, month and type and to look up the source records behind an individual visit. |
 
-### Types of data
+The project dataset includes CSV and pipe-delimited files, nested JSON Lines, and free-text clinical notes. It covers nine example sites to test branch-level reporting if the clinic expands.
 
-- **Structured**. Fixed columns such as visit IDs, dates and lab values. Examples include Alpha CSV, Gamma pipe-delimited records and the clinical Parquet tables.
-- **Semi-structured**. Beta JSON Lines has one encounter per line, with nested patient fields and arrays of diagnoses and charges.
-- **Unstructured**. The original clinical notes are free-text narratives. Their content is unstructured even though it sits in a Parquet table and links to a visit by ID.
+## What the run showed
 
-**Pipeline:** Original files → HDFS → Scala Spark SQL → separate Parquet tables for visits, notes and labs → Hive reporting with Beeline. Start with batch processing. Use the same monthly aggregation to compare Spark SQL with the lab’s Java MapReduce `ToolRunner` approach.
+- The combined batch verified **14 source files** and reconciled the Hive totals to **61,527 clinical visits**.
+- At example site SITE-08, Hive counted **181 visits in July 2024**. The team traced one procedure visit to its original note and seven lab measurements. That encounter still counted as one visit.
+- Spark SQL and Hadoop MapReduce produced the same monthly counts in the benchmark. Their timing ranges overlapped. Spark SQL fit the pipeline because it also handled parsing, record linking and checks.
 
-## Expected result for the final live run
+## Explore or run the project
 
-Trace Alpha `V533959` to clinical visit `EV0033960` at `SITE-08` on 14 July 2024. Show one visit, one original note and seven lab rows. The visit counts once in the monthly procedure report, which has 20 visits for that site and month.
+- [Project scope](https://github.com/aaronab810/isit312-bigdata/blob/project-start/docs/project_scope.md) explains the study and evaluation.
+- [Data contract](https://github.com/aaronab810/isit312-bigdata/blob/project-start/docs/data_contract.md) describes the files, shared fields and record keys.
+- [End-to-end runbook](https://github.com/aaronab810/isit312-bigdata/blob/aaron/final-vm-run/docs/demo_runbook.md) gives the commands for running the pipeline and benchmark. Use the [`aaron/final-vm-run` branch](https://github.com/aaronab810/isit312-bigdata/tree/aaron/final-vm-run) for the full runner. It needs the project dataset ZIP, HDFS, Spark and Hive. Small fixtures are included in the repository.
 
-The full TailSignal dataset contains 61,527 clinical visits, 61,527 linked notes and 99,687 lab rows. Use those totals to check the full batch run in the course VM. Capture all component run evidence, integration results, benchmark timings and demo outputs in the course VM.
-
-## Data handling
-
-Keep full archives, extracted datasets, VM images, credentials and clinic-provided records out of Git. Use small synthetic fixtures for review. Source: [TailSignal generator](https://github.com/RonCom/tailsignal).
+The project data package is available through [Google Drive](https://drive.google.com/file/d/1Y_SqKYZ3ThxQLYBDuKsIx6bzmYkospM6/view?usp=drivesdk). The generated source data uses the [TailSignal generator](https://github.com/RonCom/tailsignal). Keep full archives, VM images, credentials and clinic-provided records out of Git.
