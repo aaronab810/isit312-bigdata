@@ -1,0 +1,3 @@
+source_system,source_visit_id,clinic,source_date,source_owner_id,source_patient_id,invoice_total,source_path,batch_id
+vet_alpha,V533959,SITE-08,2024-07-14,C568564,1988096,650.5,data/pims/vet_alpha_visits.csv,fixture
+vet_alpha,V517829,SITE-08,2023-05-07,C613411,1819542,184.18,data/pims/vet_alpha_visits.csv,fixture
